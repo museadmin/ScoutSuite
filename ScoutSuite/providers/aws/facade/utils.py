@@ -90,9 +90,14 @@ class AWSFacadeUtils:
         """
 
         try:
-            return AWSFacadeUtils._clients.setdefault(
-                (service, region),
-                session.client(service, region_name=region) if region else session.client(service))
+            if service.lower() == 'ec2':  # or service.lower() == 'iam':
+                return AWSFacadeUtils._clients.setdefault(
+                    (service, region),
+                    session.client(service, region_name=region, api_rate=5) if region else session.client(service, api_rate=5))
+            else:
+                return AWSFacadeUtils._clients.setdefault(
+                    (service, region),
+                    session.client(service, region_name=region) if region else session.client(service))
         except Exception as e:
             print_exception('Failed to create client for the {} service: {}'.format(service, e))
             return None
